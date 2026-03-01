@@ -1,4 +1,18 @@
-# FinFriend – Setup Instructions
+# FinFriend – Financial Literacy Platform
+
+FinFriend is a dedicated financial literacy platform designed specifically for Ugandan university students. It aims to empower students with the knowledge and tools necessary to manage their finances effectively, plan for the future, and achieve financial independence.
+
+## Core Features
+- **Learning Modules**: Interactive courses covering essential topics such as budgeting, saving, debt management, and investing.
+- **Financial Tools**: A suite of tools including budget planners and financial calculators to help students track and manage their money.
+- **Community Forum**: A platform for students to engage in discussions, share experiences, and seek advice on various financial topics.
+- **Expert Blog**: Regularly updated insights and tips from financial experts tailored to the needs of university students.
+- **Gamified Experience**: Earn badges and climb the leaderboard as you progress through learning modules and engage with the community.
+- **Personalized Dashboard**: A central hub to track your learning progress, view achievements, and access your favorite tools.
+
+---
+
+# Setup Instructions
 
 Follow the steps below to run FinFriend locally on your laptop.
 
