@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Blog Post – FinFriend</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <nav class="navbar">
+    <div class="container">
+      <a href="/" class="navbar-brand">
+        <div class="brand-icon">💰</div>
+        Fin<span class="brand-accent">Friend</span>
+      </a>
+      <button class="hamburger" id="hamburger" aria-label="Menu"><span></span><span></span><span></span></button>
+      <div class="navbar-links" id="navLinks">
+        <a href="/modules">Modules</a>
+        <a href="/tools">Tools</a>
+        <a href="/forum">Community</a>
+        <a href="/blog" class="active">Blog</a>
+        <a href="/leaderboard">Leaderboard</a>
+      </div>
+      <div class="navbar-auth" id="navAuth"></div>
+    </div>
+  </nav>
+
+  <section class="section" style="padding-top: 2rem;">
+    <div class="container" style="max-width: 800px;">
+      <a href="/blog" class="btn btn-ghost btn-sm mb-2">← Back to Blog</a>
+      <div id="postContent" class="module-content">
+        <p class="text-muted">Loading post...</p>
+      </div>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-bottom">
+        <p>&copy; 2026 FinFriend. Made with ❤️ in Uganda.</p>
+      </div>
+    </div>
+  </footer>
+
+  <div class="toast-container" id="toastContainer"></div>
+  <script src="/js/app.js"></script>
+  <script>
+    async function loadPost() {
+      const slug = new URLSearchParams(window.location.search).get('slug');
+      if (!slug) return;
+
+      const res = await fetch(`/api/blog/${slug}`);
+      if (!res.ok) {
+        document.getElementById('postContent').innerHTML = '<p class="text-muted">Post not found.</p>';
+        return;
+      }
+
+      const p = await res.json();
+      document.title = `${p.title} – FinFriend Blog`;
+
+      document.getElementById('postContent').innerHTML = `
+        <div class="blog-meta mb-2">
+          <div style="width: 40px; height: 40px; border-radius: 50%; background: var(--primary-light); display: flex; align-items: center; justify-content: center; font-weight: 700; color: var(--primary);">${p.author.charAt(0)}</div>
+          <div>
+            <strong>${p.author}</strong><br>
+            <small class="text-muted">${new Date(p.created_at).toLocaleDateString('en-UG', { year: 'numeric', month: 'long', day: 'numeric' })}</small>
+          </div>
+        </div>
+        <h1 style="font-size: 2rem; margin-bottom: 1rem;">${p.title}</h1>
+        <p style="font-size: 1.1rem; color: var(--gray-500); margin-bottom: 2rem;">${p.excerpt || ''}</p>
+        <hr style="border: none; border-top: 1px solid var(--gray-300); margin-bottom: 2rem;">
+        ${p.body_html}
+      `;
+    }
+
+    loadPost();
+  </script>
+</body>
+</html>

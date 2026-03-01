@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Profile – FinFriend</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <nav class="navbar">
+    <div class="container">
+      <a href="/" class="navbar-brand">
+        <div class="brand-icon">💰</div>
+        Fin<span class="brand-accent">Friend</span>
+      </a>
+      <button class="hamburger" id="hamburger" aria-label="Menu"><span></span><span></span><span></span></button>
+      <div class="navbar-links" id="navLinks">
+        <a href="/modules">Modules</a>
+        <a href="/tools">Tools</a>
+        <a href="/forum">Community</a>
+        <a href="/blog">Blog</a>
+        <a href="/leaderboard">Leaderboard</a>
+      </div>
+      <div class="navbar-auth" id="navAuth"></div>
+    </div>
+  </nav>
+
+  <section class="section" style="padding-top: 2rem;">
+    <div class="container" style="max-width: 600px;">
+      <h2 class="mb-3">👤 My Profile</h2>
+
+      <div class="dash-panel">
+        <div id="profileAlert"></div>
+
+        <div id="profileInfo" style="text-align: center; margin-bottom: 1.5rem;">
+          <div style="width: 80px; height: 80px; border-radius: 50%; background: var(--primary-light); display: flex; align-items: center; justify-content: center; font-size: 2rem; font-weight: 700; color: var(--primary); margin: 0 auto 0.75rem;" id="profileAvatar">?</div>
+          <h3 id="profileName">Loading...</h3>
+          <p class="text-muted" id="profileEmail">...</p>
+          <div style="display: flex; justify-content: center; gap: 1rem; margin-top: 0.75rem;">
+            <span class="badge badge-primary" id="profileRole">student</span>
+            <span class="badge badge-accent" id="profileXP">0 XP</span>
+          </div>
+        </div>
+
+        <hr style="margin: 1.5rem 0; border: none; border-top: 1px solid var(--gray-100);">
+
+        <form id="profileForm">
+          <div class="form-group">
+            <label for="profName">Full Name</label>
+            <input type="text" id="profName" class="form-control" required>
+          </div>
+          <div class="form-group">
+            <label for="profUni">University</label>
+            <input type="text" id="profUni" class="form-control">
+          </div>
+          <button type="submit" class="btn btn-primary btn-block">Save Changes</button>
+        </form>
+
+        <hr style="margin: 1.5rem 0; border: none; border-top: 1px solid var(--gray-100);">
+
+        <button class="btn btn-danger btn-block" onclick="logout()">🚪 Log Out</button>
+      </div>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-bottom">
+        <p>&copy; 2026 FinFriend. Made with ❤️ in Uganda.</p>
+      </div>
+    </div>
+  </footer>
+
+  <div class="toast-container" id="toastContainer"></div>
+  <script src="/js/app.js"></script>
+  <script>
+    if (!isLoggedIn()) window.location.href = '/login';
+
+    async function loadProfile() {
+      const res = await apiFetch('/api/users/me');
+      if (!res.ok) return;
+      const u = await res.json();
+
+      document.getElementById('profileAvatar').textContent = u.full_name.charAt(0);
+      document.getElementById('profileName').textContent = u.full_name;
+      document.getElementById('profileEmail').textContent = u.email;
+      document.getElementById('profileRole').textContent = u.role;
+      document.getElementById('profileXP').textContent = `⭐ ${u.xp} XP`;
+      document.getElementById('profName').value = u.full_name;
+      document.getElementById('profUni').value = u.university || '';
+    }
+
+    document.getElementById('profileForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const res = await apiFetch('/api/users/me', {
+        method: 'PUT',
+        body: JSON.stringify({
+          full_name: document.getElementById('profName').value,
+          university: document.getElementById('profUni').value
+        })
+      });
+
+      if (res.ok) {
+        showToast('Profile updated!', 'success');
+        // Update stored user
+        const user = getUser();
+        user.full_name = document.getElementById('profName').value;
+        localStorage.setItem('ff_user', JSON.stringify(user));
+        updateNavAuth();
+        loadProfile();
+      } else {
+        showToast('Failed to update profile.', 'error');
+      }
+    });
+
+    loadProfile();
+  </script>
+</body>
+</html>

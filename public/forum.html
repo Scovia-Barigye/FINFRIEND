@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Community Forum – FinFriend</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <nav class="navbar">
+    <div class="container">
+      <a href="/" class="navbar-brand">
+        <div class="brand-icon">💰</div>
+        Fin<span class="brand-accent">Friend</span>
+      </a>
+      <button class="hamburger" id="hamburger" aria-label="Menu"><span></span><span></span><span></span></button>
+      <div class="navbar-links" id="navLinks">
+        <a href="/modules">Modules</a>
+        <a href="/tools">Tools</a>
+        <a href="/forum" class="active">Community</a>
+        <a href="/blog">Blog</a>
+        <a href="/leaderboard">Leaderboard</a>
+      </div>
+      <div class="navbar-auth" id="navAuth"></div>
+    </div>
+  </nav>
+
+  <section class="page-hero">
+    <div class="container">
+      <h1>💬 Community Forum</h1>
+      <p>Ask questions, share tips, and connect with fellow students on their financial journey.</p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <div class="filter-bar" id="categoryFilters">
+        <button class="filter-btn active" data-cat="">All Topics</button>
+      </div>
+
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;">
+        <h3 id="threadHeading">Recent Discussions</h3>
+        <button class="btn btn-accent btn-sm" onclick="openNewThread()">+ New Thread</button>
+      </div>
+
+      <div id="threadList"><p class="text-muted">Loading threads…</p></div>
+    </div>
+  </section>
+
+  <!-- New Thread Modal -->
+  <div class="modal-overlay" id="threadModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3>Start a Discussion</h3>
+        <button class="modal-close" onclick="closeModal('threadModal')">&times;</button>
+      </div>
+      <form id="threadForm">
+        <div class="form-group">
+          <label for="threadCat">Category</label>
+          <select id="threadCat" class="form-control" required>
+            <option value="" disabled selected>Select a category…</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="threadTitle">Title</label>
+          <input type="text" id="threadTitle" class="form-control" placeholder="What's on your mind?" required>
+        </div>
+        <div class="form-group">
+          <label for="threadBody">Details</label>
+          <textarea id="threadBody" class="form-control" rows="5" placeholder="Share more details…" required></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary btn-block">Post Thread</button>
+      </form>
+    </div>
+  </div>
+
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-bottom"><p>&copy; 2026 FinFriend. Made with ❤️ in Uganda.</p></div>
+    </div>
+  </footer>
+
+  <div class="toast-container" id="toastContainer"></div>
+  <script src="/js/app.js"></script>
+  <script>
+    let categories = [];
+
+    async function loadCategories() {
+      try {
+        const res = await fetch('/api/forum/categories');
+        if (!res.ok) throw new Error('Failed to load categories');
+        categories = await res.json();
+        const filterDiv = document.getElementById('categoryFilters');
+        categories.forEach(c => {
+          filterDiv.innerHTML += `<button class="filter-btn" data-cat="${c.slug}">${c.icon} ${c.name} (${c.thread_count})</button>`;
+        });
+        const select = document.getElementById('threadCat');
+        categories.forEach(c => {
+          const opt = document.createElement('option');
+          opt.value = c.id;
+          opt.textContent = c.icon + ' ' + c.name;
+          select.appendChild(opt);
+        });
+        filterDiv.addEventListener('click', e => {
+          const btn = e.target.closest('.filter-btn');
+          if (!btn) return;
+          document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          loadThreads(btn.dataset.cat);
+        });
+      } catch (err) {
+        console.error('loadCategories error:', err);
+        showToast('Could not load categories. Please refresh.', 'error');
+      }
+    }
+
+    async function loadThreads(category = '') {
+      try {
+        const url = category ? `/api/forum/threads?category=${category}` : '/api/forum/threads';
+        const res = await fetch(url);
+        if (!res.ok) throw new Error('Failed to load threads');
+        const threads = await res.json();
+        const list = document.getElementById('threadList');
+        if (!threads.length) {
+          list.innerHTML = '<div class="empty-state"><div class="empty-state-icon">💬</div><p>No threads yet. Be the first to start a discussion!</p></div>';
+          return;
+        }
+      list.innerHTML = threads.map(t => `
+        <a href="/forum/thread?id=${t.id}" style="text-decoration:none;color:inherit;">
+          <div class="thread-item">
+            <div class="thread-icon">${t.category_icon}</div>
+            <div class="thread-content">
+              <h4>${t.title}</h4>
+              <p>${t.body.substring(0,120)}${t.body.length>120?'...':''}</p>
+              <div class="thread-meta">
+                <span>By ${t.author}</span>
+                <span>💬 ${t.reply_count} replies</span>
+                <span>👁 ${t.views} views</span>
+                <span>${timeAgo(t.created_at)}</span>
+              </div>
+            </div>
+          </div>
+        </a>
+      `).join('');
+      } catch (err) {
+        console.error('loadThreads error:', err);
+        document.getElementById('threadList').innerHTML = '<p class="text-muted">Could not load threads. Please refresh.</p>';
+      }
+    }
+
+    function timeAgo(date) {
+      const seconds = Math.floor((new Date() - new Date(date)) / 1000);
+      const intervals = { year:31536000, month:2592000, week:604800, day:86400, hour:3600, minute:60 };
+      for (const [unit, secs] of Object.entries(intervals)) {
+        const count = Math.floor(seconds / secs);
+        if (count >= 1) return `${count} ${unit}${count>1?'s':''} ago`;
+      }
+      return 'Just now';
+    }
+
+    function openNewThread() {
+      const token = localStorage.getItem('ff_token');
+      if (!token) { showToast('Please log in to create a thread.', 'error'); return; }
+      document.getElementById('threadModal').classList.add('active');
+    }
+
+    document.getElementById('threadForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const category_id = document.getElementById('threadCat').value;
+      const title = document.getElementById('threadTitle').value;
+      const body  = document.getElementById('threadBody').value;
+      const res   = await apiFetch('/api/forum/threads', { method:'POST', body:JSON.stringify({category_id,title,body}) });
+      const data  = await res.json();
+      if (res.ok) { showToast('Thread created!','success'); closeModal('threadModal'); window.location.href=`/forum/thread?id=${data.id}`; }
+      else { showToast(data.error || 'Failed to create thread.','error'); }
+    });
+
+    loadCategories();
+    loadThreads();
+  </script>
+</body>
+</html>

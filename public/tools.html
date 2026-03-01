@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Financial Tools – FinFriend</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <nav class="navbar">
+    <div class="container">
+      <a href="/" class="navbar-brand">
+        <div class="brand-icon">💰</div>
+        Fin<span class="brand-accent">Friend</span>
+      </a>
+      <button class="hamburger" id="hamburger" aria-label="Menu"><span></span><span></span><span></span></button>
+      <div class="navbar-links" id="navLinks">
+        <a href="/modules">Modules</a>
+        <a href="/tools" class="active">Tools</a>
+        <a href="/forum">Community</a>
+        <a href="/blog">Blog</a>
+        <a href="/leaderboard">Leaderboard</a>
+      </div>
+      <div class="navbar-auth" id="navAuth"></div>
+    </div>
+  </nav>
+
+  <section class="page-hero">
+    <div class="container">
+      <h1>🧮 Financial Calculators</h1>
+      <p>Plan your budget, forecast investment returns, and calculate loan repayments — all in UGX.</p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <div class="grid grid-3">
+
+        <!-- Budget Calculator -->
+        <div class="tool-card">
+          <div class="tool-card-header">
+            <div class="tool-icon icon-yellow">💰</div>
+            <div>
+              <h3>Budget Planner</h3>
+              <p class="tool-desc">Split income using the 50/30/20 rule.</p>
+            </div>
+          </div>
+          <form id="budgetForm">
+            <div class="form-group">
+              <label>Monthly Income (UGX)</label>
+              <input type="number" id="budgetIncome" class="form-control" placeholder="e.g. 500,000" required min="1">
+            </div>
+            <div class="form-group">
+              <label>Needs %</label>
+              <input type="number" id="budgetNeeds" class="form-control" value="50" min="0" max="100">
+            </div>
+            <div class="form-group">
+              <label>Wants %</label>
+              <input type="number" id="budgetWants" class="form-control" value="30" min="0" max="100">
+            </div>
+            <div class="form-group">
+              <label>Savings %</label>
+              <input type="number" id="budgetSavings" class="form-control" value="20" min="0" max="100">
+            </div>
+            <button type="submit" class="btn btn-primary btn-block">Calculate →</button>
+          </form>
+          <div id="budgetResult" class="result-box hidden"></div>
+        </div>
+
+        <!-- Investment Calculator -->
+        <div class="tool-card">
+          <div class="tool-card-header">
+            <div class="tool-icon icon-green">📈</div>
+            <div>
+              <h3>Investment Returns</h3>
+              <p class="tool-desc">See how your money can grow over time.</p>
+            </div>
+          </div>
+          <form id="investForm">
+            <div class="form-group">
+              <label>Initial Amount (UGX)</label>
+              <input type="number" id="investPrincipal" class="form-control" placeholder="e.g. 100,000" required min="1">
+            </div>
+            <div class="form-group">
+              <label>Monthly Contribution (UGX)</label>
+              <input type="number" id="investMonthly" class="form-control" placeholder="e.g. 20,000" value="0" min="0">
+            </div>
+            <div class="form-group">
+              <label>Annual Interest Rate (%)</label>
+              <input type="number" id="investRate" class="form-control" placeholder="e.g. 10" required min="0" step="0.1">
+            </div>
+            <div class="form-group">
+              <label>Number of Years</label>
+              <input type="number" id="investYears" class="form-control" placeholder="e.g. 5" required min="1">
+            </div>
+            <button type="submit" class="btn btn-primary btn-block">Calculate →</button>
+          </form>
+          <div id="investResult" class="result-box hidden"></div>
+        </div>
+
+        <!-- Loan Calculator -->
+        <div class="tool-card">
+          <div class="tool-card-header">
+            <div class="tool-icon icon-blue">🏦</div>
+            <div>
+              <h3>Loan Repayment</h3>
+              <p class="tool-desc">Find your monthly payment and total interest.</p>
+            </div>
+          </div>
+          <form id="loanForm">
+            <div class="form-group">
+              <label>Loan Amount (UGX)</label>
+              <input type="number" id="loanPrincipal" class="form-control" placeholder="e.g. 2,000,000" required min="1">
+            </div>
+            <div class="form-group">
+              <label>Annual Interest Rate (%)</label>
+              <input type="number" id="loanRate" class="form-control" placeholder="e.g. 18" required min="0" step="0.1">
+            </div>
+            <div class="form-group">
+              <label>Loan Term (months)</label>
+              <input type="number" id="loanMonths" class="form-control" placeholder="e.g. 12" required min="1">
+            </div>
+            <button type="submit" class="btn btn-primary btn-block">Calculate →</button>
+          </form>
+          <div id="loanResult" class="result-box hidden"></div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-bottom"><p>&copy; 2026 FinFriend. Made with ❤️ in Uganda.</p></div>
+    </div>
+  </footer>
+
+  <div class="toast-container" id="toastContainer"></div>
+  <script src="/js/app.js"></script>
+  <script>
+    function formatUGX(n) { return 'UGX ' + Number(n).toLocaleString('en-UG'); }
+
+    document.getElementById('budgetForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const income = Number(document.getElementById('budgetIncome').value);
+      const needs_pct = Number(document.getElementById('budgetNeeds').value);
+      const wants_pct = Number(document.getElementById('budgetWants').value);
+      const savings_pct = Number(document.getElementById('budgetSavings').value);
+      if (needs_pct + wants_pct + savings_pct !== 100) { showToast('Percentages must add up to 100%.', 'error'); return; }
+      const res  = await fetch('/api/tools/budget', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({income,needs_pct,wants_pct,savings_pct}) });
+      const data = await res.json();
+      const div  = document.getElementById('budgetResult');
+      div.classList.remove('hidden');
+      div.innerHTML = `
+        <div class="result-value">${formatUGX(income)}</div>
+        <div class="result-label">Monthly income breakdown</div>
+        <hr style="margin:1rem 0;border:none;border-top:1px solid rgba(79,70,229,.1);">
+        <div class="result-row"><span>🏠 Needs (${needs_pct}%)</span><strong>${formatUGX(data.needs)}</strong></div>
+        <div class="result-row"><span>🎭 Wants (${wants_pct}%)</span><strong>${formatUGX(data.wants)}</strong></div>
+        <div class="result-row"><span>💰 Savings (${savings_pct}%)</span><strong>${formatUGX(data.savings)}</strong></div>`;
+    });
+
+    document.getElementById('investForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const principal = Number(document.getElementById('investPrincipal').value);
+      const monthly_contribution = Number(document.getElementById('investMonthly').value);
+      const annual_rate = Number(document.getElementById('investRate').value);
+      const years = Number(document.getElementById('investYears').value);
+      const res  = await fetch('/api/tools/investment', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({principal,monthly_contribution,annual_rate,years}) });
+      const data = await res.json();
+      const div  = document.getElementById('investResult');
+      div.classList.remove('hidden');
+      div.innerHTML = `
+        <div class="result-value">${formatUGX(data.future_value)}</div>
+        <div class="result-label">Estimated value after ${years} years</div>
+        <hr style="margin:1rem 0;border:none;border-top:1px solid rgba(79,70,229,.1);">
+        <div class="result-row"><span>Total Invested</span><strong>${formatUGX(data.total_invested)}</strong></div>
+        <div class="result-row"><span>Interest Earned</span><strong class="text-accent">${formatUGX(data.interest_earned)}</strong></div>`;
+    });
+
+    document.getElementById('loanForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const principal = Number(document.getElementById('loanPrincipal').value);
+      const annual_rate = Number(document.getElementById('loanRate').value);
+      const months = Number(document.getElementById('loanMonths').value);
+      const res  = await fetch('/api/tools/loan', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({principal,annual_rate,months}) });
+      const data = await res.json();
+      const div  = document.getElementById('loanResult');
+      div.classList.remove('hidden');
+      div.innerHTML = `
+        <div class="result-value">${formatUGX(data.monthly_payment)}/month</div>
+        <div class="result-label">Monthly payment for ${months} months</div>
+        <hr style="margin:1rem 0;border:none;border-top:1px solid rgba(79,70,229,.1);">
+        <div class="result-row"><span>Total Repayment</span><strong>${formatUGX(data.total_paid)}</strong></div>
+        <div class="result-row"><span>Total Interest</span><strong style="color:var(--danger)">${formatUGX(data.total_interest)}</strong></div>`;
+    });
+  </script>
+</body>
+</html>
