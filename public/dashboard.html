@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard – FinFriend</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <nav class="navbar">
+    <div class="container">
+      <a href="/" class="navbar-brand">
+        <div class="brand-icon">💰</div>
+        Fin<span class="brand-accent">Friend</span>
+      </a>
+      <button class="hamburger" id="hamburger" aria-label="Menu">
+        <span></span><span></span><span></span>
+      </button>
+      <div class="navbar-links" id="navLinks">
+        <a href="/modules">Modules</a>
+        <a href="/tools">Tools</a>
+        <a href="/forum">Community</a>
+        <a href="/blog">Blog</a>
+        <a href="/leaderboard">Leaderboard</a>
+      </div>
+      <div class="navbar-auth" id="navAuth"></div>
+    </div>
+  </nav>
+
+  <section class="section" style="padding-top: 2rem;">
+    <div class="container">
+      <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; margin-bottom: 1.5rem;">
+        <div>
+          <h2 id="welcomeMsg">Welcome back!</h2>
+          <p class="text-muted">Your financial overview</p>
+        </div>
+        <a href="/modules" class="btn btn-primary">Continue Learning →</a>
+      </div>
+
+      <!-- Stats -->
+      <div class="stats-row" id="dashStats">
+        <div class="stat-card">
+          <div class="stat-icon">📚</div>
+          <div class="stat-value" id="statModules">0/0</div>
+          <div class="stat-label">Modules Completed</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">⭐</div>
+          <div class="stat-value" id="statXP">0</div>
+          <div class="stat-label">Total XP</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">🏅</div>
+          <div class="stat-value" id="statBadges">0</div>
+          <div class="stat-label">Badges Earned</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">🎯</div>
+          <div class="stat-value" id="statGoals">0</div>
+          <div class="stat-label">Active Goals</div>
+        </div>
+      </div>
+
+      <div class="dashboard-grid">
+        <!-- Expenses Panel -->
+        <div class="dash-panel">
+          <h3>💸 Recent Expenses</h3>
+          <div id="expenseList"><p class="text-muted text-sm">No expenses tracked yet.</p></div>
+          <button class="btn btn-outline btn-sm mt-2" onclick="openExpenseModal()">+ Add Expense</button>
+        </div>
+
+        <!-- Goals Panel -->
+        <div class="dash-panel">
+          <h3>🎯 Savings Goals</h3>
+          <div id="goalList"><p class="text-muted text-sm">No goals set yet.</p></div>
+          <button class="btn btn-outline btn-sm mt-2" onclick="openGoalModal()">+ Add Goal</button>
+        </div>
+
+        <!-- Progress Panel -->
+        <div class="dash-panel dashboard-full">
+          <h3>📈 Module Progress</h3>
+          <div id="progressList"><p class="text-muted text-sm">Start learning to see your progress here.</p></div>
+        </div>
+
+        <!-- Badges Panel -->
+        <div class="dash-panel dashboard-full">
+          <h3>🏅 Your Badges</h3>
+          <div id="badgeList" style="display: flex; gap: 1rem; flex-wrap: wrap;">
+            <p class="text-muted text-sm">Complete modules to earn badges.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Add Expense Modal -->
+  <div class="modal-overlay" id="expenseModal">
+    <div class="modal">
+      <button class="modal-close" onclick="closeModal('expenseModal')">&times;</button>
+      <h3>Add Expense</h3>
+      <form id="expenseForm">
+        <div class="form-group">
+          <label for="expCategory">Category</label>
+          <select id="expCategory" class="form-control" required>
+            <option value="food">🍛 Food</option>
+            <option value="transport">🚌 Transport</option>
+            <option value="airtime">📱 Airtime & Data</option>
+            <option value="rent">🏠 Rent</option>
+            <option value="tuition">📖 Tuition</option>
+            <option value="entertainment">🎬 Entertainment</option>
+            <option value="other">📦 Other</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="expAmount">Amount (UGX)</label>
+          <input type="number" id="expAmount" class="form-control" placeholder="e.g. 15000" required min="1">
+        </div>
+        <div class="form-group">
+          <label for="expDesc">Description (optional)</label>
+          <input type="text" id="expDesc" class="form-control" placeholder="e.g. Lunch at campus canteen">
+        </div>
+        <div class="form-group">
+          <label for="expDate">Date</label>
+          <input type="date" id="expDate" class="form-control" required>
+        </div>
+        <button type="submit" class="btn btn-primary btn-block">Save Expense</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Add Goal Modal -->
+  <div class="modal-overlay" id="goalModal">
+    <div class="modal">
+      <button class="modal-close" onclick="closeModal('goalModal')">&times;</button>
+      <h3>Set a Savings Goal</h3>
+      <form id="goalForm">
+        <div class="form-group">
+          <label for="goalTitle">Goal</label>
+          <input type="text" id="goalTitle" class="form-control" placeholder="e.g. Emergency fund" required>
+        </div>
+        <div class="form-group">
+          <label for="goalTarget">Target Amount (UGX)</label>
+          <input type="number" id="goalTarget" class="form-control" placeholder="e.g. 500000" required min="1">
+        </div>
+        <div class="form-group">
+          <label for="goalDeadline">Deadline (optional)</label>
+          <input type="date" id="goalDeadline" class="form-control">
+        </div>
+        <button type="submit" class="btn btn-accent btn-block">Create Goal</button>
+      </form>
+    </div>
+  </div>
+
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-bottom">
+        <p>&copy; 2026 FinFriend. Made with ❤️ in Uganda.</p>
+      </div>
+    </div>
+  </footer>
+
+  <div class="toast-container" id="toastContainer"></div>
+  <script src="/js/app.js"></script>
+  <script src="/js/dashboard.js"></script>
+</body>
+</html>

@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sign Up – FinFriend</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <div class="auth-container">
+    <div class="auth-card">
+      <a href="/" class="auth-logo">
+        <div class="brand-icon">💰</div>
+        Fin<span class="brand-accent">Friend</span>
+      </a>
+      <h2>Create Your Account 🚀</h2>
+      <p class="subtitle">Start your financial literacy journey today — it's free</p>
+
+      <div id="registerAlert"></div>
+
+      <form id="registerForm">
+        <div class="form-group">
+          <label for="name">Full Name</label>
+          <input type="text" id="name" class="form-control" placeholder="Nakato Aisha" required>
+        </div>
+        <div class="form-group">
+          <label for="email">Email Address</label>
+          <input type="email" id="email" class="form-control" placeholder="you@university.ac.ug" required>
+        </div>
+        <div class="form-group">
+          <label for="university">University</label>
+          <select id="university" class="form-control" required>
+            <option value="">Select your university…</option>
+            <option>Makerere University</option>
+            <option>Kyambogo University</option>
+            <option>Kampala International University</option>
+            <option>Uganda Christian University</option>
+            <option>Nkumba University</option>
+            <option>Other</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input type="password" id="password" class="form-control" placeholder="At least 6 characters" required>
+        </div>
+        <button type="submit" class="btn btn-primary btn-block btn-lg">Create Account →</button>
+      </form>
+
+      <div class="auth-divider">Already have an account?</div>
+      <a href="/login" class="btn btn-outline btn-block">Log In</a>
+    </div>
+  </div>
+
+  <div class="toast-container" id="toastContainer"></div>
+  <script src="/js/app.js"></script>
+  <script>
+    document.getElementById('registerForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const name       = document.getElementById('name').value;
+      const email      = document.getElementById('email').value;
+      const university = document.getElementById('university').value;
+      const password   = document.getElementById('password').value;
+      const alertBox   = document.getElementById('registerAlert');
+      try {
+        const res  = await fetch('/api/auth/register', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({name,email,university,password}) });
+        const data = await res.json();
+        if (!res.ok) { alertBox.innerHTML=`<div class="alert alert-danger">${data.error}</div>`; return; }
+        localStorage.setItem('ff_token', data.token);
+        localStorage.setItem('ff_user', JSON.stringify(data.user));
+        showToast('Account created! Welcome to FinFriend 🎉', 'success');
+        setTimeout(() => window.location.href = '/dashboard', 600);
+      } catch { alertBox.innerHTML='<div class="alert alert-danger">Connection error. Please try again.</div>'; }
+    });
+  </script>
+</body>
+</html>

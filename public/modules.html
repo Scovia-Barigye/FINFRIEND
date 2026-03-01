@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Learning Modules – FinFriend</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <nav class="navbar">
+    <div class="container">
+      <a href="/" class="navbar-brand">
+        <div class="brand-icon">💰</div>
+        Fin<span class="brand-accent">Friend</span>
+      </a>
+      <button class="hamburger" id="hamburger" aria-label="Menu"><span></span><span></span><span></span></button>
+      <div class="navbar-links" id="navLinks">
+        <a href="/modules" class="active">Modules</a>
+        <a href="/tools">Tools</a>
+        <a href="/forum">Community</a>
+        <a href="/blog">Blog</a>
+        <a href="/leaderboard">Leaderboard</a>
+      </div>
+      <div class="navbar-auth" id="navAuth"></div>
+    </div>
+  </nav>
+  <section class="page-hero">
+    <div class="container">
+      <h1>📚 Financial Literacy Modules</h1>
+      <p>Bite-sized lessons on budgeting, saving, investing, and more. Learn at your own pace and earn XP.</p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <div class="filter-bar" id="filterBar">
+        <button class="filter-btn active" data-cat="">All Topics</button>
+        <button class="filter-btn" data-cat="budgeting">💰 Budgeting</button>
+        <button class="filter-btn" data-cat="saving">⭐ Saving</button>
+        <button class="filter-btn" data-cat="investing">📈 Investing</button>
+        <button class="filter-btn" data-cat="credit">💳 Credit</button>
+        <button class="filter-btn" data-cat="general">📋 General</button>
+      </div>
+      <div class="grid grid-3" id="moduleGrid">
+        <p class="text-muted">Loading modules…</p>
+      </div>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-bottom">
+        <p>&copy; 2026 FinFriend. Made with ❤️ in Uganda.</p>
+      </div>
+    </div>
+  </footer>
+
+  <div class="toast-container" id="toastContainer"></div>
+  <script src="/js/app.js"></script>
+  <script>
+    const bannerMap = { budgeting:'banner-budgeting', saving:'banner-saving', investing:'banner-investing', credit:'banner-credit', general:'banner-general' };
+    const emojiMap  = { budgeting:'💰', saving:'⭐', investing:'📈', credit:'💳', general:'📋' };
+
+    async function loadModules(category = '') {
+      const url = category ? `/api/modules?category=${category}` : '/api/modules';
+      const res = await fetch(url);
+      const modules = await res.json();
+      const grid = document.getElementById('moduleGrid');
+      if (!modules.length) {
+        grid.innerHTML = '<div class="empty-state"><div class="empty-state-icon">📭</div><p>No modules found for this category.</p></div>';
+        return;
+      }
+      grid.innerHTML = modules.map(m => `
+        <div class="module-card fade-up visible">
+          <div class="module-card-banner ${bannerMap[m.category] || 'banner-general'}">${emojiMap[m.category] || '📋'}</div>
+          <div class="module-card-body">
+            <div style="display:flex;gap:.5rem;margin-bottom:.4rem;">
+              <span class="badge badge-primary">${m.category}</span>
+              <span class="badge badge-accent">${m.difficulty}</span>
+            </div>
+            <h3>${m.title}</h3>
+            <p>${m.description}</p>
+            <div class="module-card-footer">
+              <span class="text-sm text-muted">⭐ ${m.xp_reward} XP</span>
+              <a href="/module?slug=${m.slug}" class="btn btn-primary btn-sm">Start →</a>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    document.getElementById('filterBar').addEventListener('click', e => {
+      const btn = e.target.closest('.filter-btn');
+      if (!btn) return;
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      loadModules(btn.dataset.cat);
+    });
+
+    loadModules();
+  </script>
+</body>
+</html>

@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Expert Insights – FinFriend Blog</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <nav class="navbar">
+    <div class="container">
+      <a href="/" class="navbar-brand">
+        <div class="brand-icon">💰</div>
+        Fin<span class="brand-accent">Friend</span>
+      </a>
+      <button class="hamburger" id="hamburger" aria-label="Menu"><span></span><span></span><span></span></button>
+      <div class="navbar-links" id="navLinks">
+        <a href="/modules">Modules</a>
+        <a href="/tools">Tools</a>
+        <a href="/forum">Community</a>
+        <a href="/blog" class="active">Blog</a>
+        <a href="/leaderboard">Leaderboard</a>
+      </div>
+      <div class="navbar-auth" id="navAuth"></div>
+    </div>
+  </nav>
+
+  <section class="page-hero">
+    <div class="container">
+      <h1>🎓 Expert Insights</h1>
+      <p>Financial tips, strategies, and advice from experienced professionals in East Africa.</p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <div class="grid grid-2" id="blogGrid">
+        <p class="text-muted">Loading posts...</p>
+      </div>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-bottom">
+        <p>&copy; 2026 FinFriend. Made with ❤️ in Uganda.</p>
+      </div>
+    </div>
+  </footer>
+
+  <div class="toast-container" id="toastContainer"></div>
+  <script src="/js/app.js"></script>
+  <script>
+    async function loadBlog() {
+      const res = await fetch('/api/blog');
+      const posts = await res.json();
+      const grid = document.getElementById('blogGrid');
+
+      if (!posts.length) {
+        grid.innerHTML = '<p class="text-muted">No blog posts yet. Check back soon!</p>';
+        return;
+      }
+
+      grid.innerHTML = posts.map(p => `
+        <a href="/blog/post?slug=${p.slug}" style="text-decoration: none; color: inherit;">
+          <div class="card blog-card">
+            <div class="card-img" style="background: linear-gradient(135deg, var(--primary-light), var(--accent-light)); display: flex; align-items: center; justify-content: center; font-size: 3rem;">📝</div>
+            <div class="card-body">
+              <div class="blog-meta">
+                <div style="width: 32px; height: 32px; border-radius: 50%; background: var(--primary-light); display: flex; align-items: center; justify-content: center; font-weight: 700; color: var(--primary); font-size: 0.8rem;">${p.author.charAt(0)}</div>
+                <span>${p.author}</span>
+                <span>•</span>
+                <span>${new Date(p.created_at).toLocaleDateString('en-UG', { year: 'numeric', month: 'long', day: 'numeric' })}</span>
+              </div>
+              <h3>${p.title}</h3>
+              <p>${p.excerpt || ''}</p>
+              <span class="btn btn-ghost btn-sm" style="padding-left: 0;">Read More →</span>
+            </div>
+          </div>
+        </a>
+      `).join('');
+    }
+
+    loadBlog();
+  </script>
+</body>
+</html>
