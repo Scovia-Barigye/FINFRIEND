@@ -12,6 +12,7 @@ FinFriend is a dedicated financial literacy platform designed specifically for U
 
 ---
 
+
 # Setup Instructions
 
 Follow the steps below to run FinFriend locally on your laptop.
