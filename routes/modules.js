@@ -87,22 +87,71 @@ router.post('/:slug/quiz', authMiddleware, async (req, res) => {
 });
 
 // ── Mark module as complete (no quiz required) ──────────
-router.post('/:slug/complete', authMiddleware, async (req, res) => {
-  try {
-    const [mod] = await pool.query('SELECT id, xp_reward FROM modules WHERE slug = ?', [req.params.slug]);
-    if (!mod.length) return res.status(404).json({ error: 'Module not found.' });
+// router.post('/:slug/complete', authMiddleware, async (req, res) => {
+//   try {
+//     const [mod] = await pool.query('SELECT id, xp_reward FROM modules WHERE slug = ?', [req.params.slug]);
+//     if (!mod.length) return res.status(404).json({ error: 'Module not found.' });
 
-    await pool.query(`
+//     await pool.query(`
+//       INSERT INTO user_progress (user_id, module_id, completed, completed_at)
+//       VALUES (?, ?, TRUE, NOW())
+//       ON DUPLICATE KEY UPDATE completed = TRUE, completed_at = NOW()
+//     `, [req.user.id, mod[0].id]);
+
+//     await pool.query('UPDATE users SET xp = xp + ? WHERE id = ?', [mod[0].xp_reward, req.user.id]);
+
+//     res.json({ message: 'Module completed!', xp_earned: mod[0].xp_reward });
+//   } catch (err) {
+//     res.status(500).json({ error: 'Failed to complete module.' });
+//   }
+// });
+
+// ── Mark module as complete (no quiz required) ──────────
+// Multiple XP award FIX
+router.post("/:slug/complete", authMiddleware, async (req, res) => {
+  try {
+    const [mod] = await pool.query(
+      "SELECT id, xp_reward FROM modules WHERE slug = ?",
+      [req.params.slug],
+    );
+    if (!mod.length)
+      return res.status(404).json({ error: "Module not found." });
+
+    // Check if this user already completed this module before
+    const [existing] = await pool.query(
+      "SELECT completed FROM user_progress WHERE user_id = ? AND module_id = ?",
+      [req.user.id, mod[0].id],
+    );
+
+    // Figure out if they were already marked complete before this click
+    const alreadyCompleted = existing.length > 0 && existing[0].completed === 1;
+
+    // Always save/update the progress row
+    await pool.query(
+      `
       INSERT INTO user_progress (user_id, module_id, completed, completed_at)
       VALUES (?, ?, TRUE, NOW())
       ON DUPLICATE KEY UPDATE completed = TRUE, completed_at = NOW()
-    `, [req.user.id, mod[0].id]);
+    `,
+      [req.user.id, mod[0].id],
+    );
 
-    await pool.query('UPDATE users SET xp = xp + ? WHERE id = ?', [mod[0].xp_reward, req.user.id]);
+    // Only give XP if they were NOT already completed before this click
+    if (!alreadyCompleted) {
+      await pool.query("UPDATE users SET xp = xp + ? WHERE id = ?", [
+        mod[0].xp_reward,
+        req.user.id,
+      ]);
+      return res.json({
+        message: "Module completed!",
+        xp_earned: mod[0].xp_reward,
+      });
+    }
 
-    res.json({ message: 'Module completed!', xp_earned: mod[0].xp_reward });
+    // If they already completed it, tell them but don't add XP again
+    res.json({ message: "Module already completed.", xp_earned: 0 });
   } catch (err) {
-    res.status(500).json({ error: 'Failed to complete module.' });
+    res.status(500).json({ error: "Failed to complete module." });
   }
 });
 
