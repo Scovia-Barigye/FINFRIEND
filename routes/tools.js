@@ -17,9 +17,17 @@ router.post('/budget', (req, res) => {
 });
 
 // ── Investment Return Calculator ────────────────────────
+// router.post('/investment', (req, res) => {
+//   const { principal, monthly_contribution = 0, annual_rate, years } = req.body;
+//   if (!principal || !annual_rate || !years) {
+//     return res.status(400).json({ error: 'principal, annual_rate, and years are required.' });
+//   }
+
+// ── Investment Return Calculator ────────────────────────
+// VAlidattion FIX as well
 router.post('/investment', (req, res) => {
   const { principal, monthly_contribution = 0, annual_rate, years } = req.body;
-  if (!principal || !annual_rate || !years) {
+  if (!principal || annual_rate === undefined || annual_rate === null || !years) {
     return res.status(400).json({ error: 'principal, annual_rate, and years are required.' });
   }
 
@@ -43,9 +51,17 @@ router.post('/investment', (req, res) => {
 });
 
 // ── Loan Repayment Calculator ───────────────────────────
+// router.post('/loan', (req, res) => {
+//   const { principal, annual_rate, months } = req.body;
+//   if (!principal || !annual_rate || !months) {
+//     return res.status(400).json({ error: 'principal, annual_rate, and months are required.' });
+//   }
+
+// ── Loan Repayment Calculator ───────────────────────────
+// Validation Bug FIX
 router.post('/loan', (req, res) => {
   const { principal, annual_rate, months } = req.body;
-  if (!principal || !annual_rate || !months) {
+  if (!principal || annual_rate === undefined || annual_rate === null || !months) {
     return res.status(400).json({ error: 'principal, annual_rate, and months are required.' });
   }
 

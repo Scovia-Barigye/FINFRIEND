@@ -1,4 +1,5 @@
-require('dotenv').config();
+require('dotenv').config()
+
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
@@ -15,6 +16,35 @@ const toolRoutes = require('./routes/tools');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+//-------------Failure Logger----------------
+const fs = require("fs");
+// const path = require("path");    // Already declaared
+
+// This variable tracks when the server started
+const serverStartTime = Date.now();
+
+// Middleware to log every API request (for calculating operation probabilities)
+app.use("/api", (req, res, next) => {
+  const start = Date.now();
+  res.on("finish", () => {
+    // Only log if the response was an error (status 500)
+    if (res.statusCode >= 500) {
+      const logEntry = {
+        timestamp: new Date().toISOString(),
+        timeFromStart: (Date.now() - serverStartTime) / 1000, // seconds
+        route: req.method + " " + req.path,
+        status: res.statusCode,
+      };
+      // Append to a log file
+      fs.appendFileSync(
+        path.join(__dirname, "failure_log.json"),
+        JSON.stringify(logEntry) + "\n",
+      );
+    }
+  });
+  next();
+});
 
 // --------------- Middleware ---------------
 app.use(cors());
@@ -73,9 +103,25 @@ app.use((req, res) => {
   res.status(404).sendFile(path.join(__dirname, 'public', '404.html'));
 });
 
-// Global error handler
+// // Global error handler
+// app.use((err, req, res, next) => {
+//   console.error(err.stack);
+//   res.status(500).json({ error: 'Something went wrong!' });
+// });
+
+// Global error handler — also logs failures to failure_log.json for reliability tracking
 app.use((err, req, res, next) => {
   console.error(err.stack);
+
+  // Write this failure to our log file so we can calculate reliability metrics
+  const logEntry = {
+    timestamp: new Date().toISOString(),
+    route: req.method + ' ' + req.path,
+    error: err.message || 'Unknown error',
+    status: 500
+  };
+  fs.appendFileSync('failure_log.json', JSON.stringify(logEntry) + '\n');
+
   res.status(500).json({ error: 'Something went wrong!' });
 });
 
